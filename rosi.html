@@ -1,629 +1,200 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SkillSwap — Demo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Task Tracker</title>
   <style>
-    /* Simple, modern-ish styling — tweak as you like */
-    :root{
-      --bg:#0f1724;
-      --card:#0b1220;
-      --muted:#9aa4b2;
-      --accent:#6ee7b7;
-      --glass: rgba(255,255,255,0.04);
-      --round: 12px;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+      color: #333;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      background: linear-gradient(180deg,#071027 0%, #07192a 50%, #04202f 100%);
-      color:#e6eef6;
-      min-height:100vh;
-      padding:24px;
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
     }
-    .container{max-width:1100px;margin:0 auto}
-    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-    .brand{display:flex;gap:12px;align-items:center}
-    .logo{
-      width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;color:#032; font-weight:700;
-      box-shadow:0 6px 20px rgba(0,0,0,0.4)
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
     }
-    h1{font-size:18px;margin:0}
-    .muted{color:var(--muted);font-size:13px}
-    .actions{display:flex;gap:8px;align-items:center}
-    button{background:var(--glass);border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:inherit;cursor:pointer}
-    button.primary{background:linear-gradient(90deg,#4ade80,#60a5fa);color:#032;border:0}
-    .layout{display:grid;grid-template-columns:320px 1fr;gap:18px}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:16px;border-radius:var(--round);box-shadow:0 6px 18px rgba(2,6,23,0.6)}
-    form .row{display:flex;flex-direction:column;margin-bottom:10px}
-    label{font-size:13px;color:var(--muted);margin-bottom:6px}
-    input[type="text"], input[type="email"], input[type="password"], textarea, select{
-      padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;
+    .task-form, .filter {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
     }
-    textarea{min-height:86px;resize:vertical}
-    .lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-    .lesson-card{padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
-    .lesson-title{font-weight:700;margin:0 0 6px 0}
-    .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-    .tag{font-size:12px;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);color:var(--muted)}
-    .small{font-size:12px;color:var(--muted)}
-    .row-between{display:flex;justify-content:space-between;align-items:center}
-    .searchbar{display:flex;gap:8px;margin-bottom:8px}
-    .searchbar input{flex:1}
-    .center{display:flex;align-items:center;gap:8px}
-    .note{font-size:12px;color:var(--muted);margin-top:8px}
-    footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
-    @media (max-width:880px){
-      .layout{grid-template-columns:1fr; }
-      .actions{gap:6px}
+    input[type="text"], select {
+      padding: 8px;
+      flex: 1;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
-    /* small modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(1,6,15,0.6);display:none;align-items:center;justify-content:center;z-index:40}
-    .modal{background:linear-gradient(180deg,#071126,#081826);padding:18px;border-radius:12px;min-width:320px;max-width:720px}
-    .hidden{display:none}
-    .star{cursor:pointer;font-size:18px}
-    .badge{font-weight:700;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.03)}
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      background-color: #2e86de;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1b4f72;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #e0e0e0;
+    }
+    .completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+    .action-btn {
+      background-color: #28a745;
+    }
+    .action-btn.delete {
+      background-color: #dc3545;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <div class="brand">
-        <div class="logo">SS</div>
-        <div>
-          <h1>SkillSwap <span class="muted">— micro-lessons exchange (demo)</span></h1>
-        </div>
-      </div>
+    <h1>Team Task Tracker</h1>
 
-      <div class="actions">
-        <div id="who" class="muted">Not signed in</div>
-        <button id="btnNewLesson" class="hidden">New Lesson</button>
-        <button id="btnLogin">Sign up / Login</button>
-        <button id="btnLogout" class="hidden">Logout</button>
-      </div>
-    </header>
-
-    <main class="layout">
-      <!-- LEFT: controls -->
-      <aside class="card">
-        <div class="muted" style="margin-bottom:10px">Search & filters</div>
-        <div class="searchbar">
-          <input id="q" placeholder="Search title or tag..." />
-          <select id="sort">
-            <option value="recent">Sort: recent</option>
-            <option value="popular">Sort: popular</option>
-          </select>
-        </div>
-
-        <div style="margin-top:12px">
-          <div class="muted">Your bookings</div>
-          <div id="bookingsList" class="note">No bookings yet</div>
-        </div>
-
-        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
-
-        <div>
-          <div class="muted">Quick demo accounts</div>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button id="demoAlice">Use Alice</button>
-            <button id="demoBob">Use Bob</button>
-          </div>
-          <div class="note">These create demo users in localStorage (no real backend).</div>
-        </div>
-      </aside>
-
-      <!-- RIGHT: content -->
-      <section>
-        <div class="card" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div class="muted">Browse lessons</div>
-            <div class="note">Create and test posting, booking, and reviewing without a server.</div>
-          </div>
-          <div class="center">
-            <div id="counts" class="muted"></div>
-          </div>
-        </div>
-
-        <div id="lessons" class="lessons"></div>
-
-        <footer>
-          Built for team demo • Data stored in your browser (localStorage).
-        </footer>
-      </section>
-    </main>
-  </div>
-
-  <!-- New lesson modal -->
-  <div id="modalBackdrop" class="modal-backdrop">
-    <div class="modal card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <strong id="modalTitle">New lesson</strong>
-        <button id="closeModal">✕</button>
-      </div>
-
-      <form id="lessonForm">
-        <div class="row">
-          <label>Title</label>
-          <input id="lessonTitle" required />
-        </div>
-        <div class="row">
-          <label>Description</label>
-          <textarea id="lessonDesc" required></textarea>
-        </div>
-        <div class="row">
-          <label>Tags (comma separated)</label>
-          <input id="lessonTags" placeholder="e.g. JavaScript, Data Science" />
-        </div>
-        <div class="row">
-          <label>Estimated minutes</label>
-          <input id="lessonTime" type="number" min="5" max="180" value="20" />
-        </div>
-
-        <div style="display:flex;gap:8px;align-items:center">
-          <button type="submit" class="primary">Post lesson</button>
-          <button type="button" id="cancelModal">Cancel</button>
-        </div>
-      </form>
+    <div class="task-form">
+      <input type="text" id="taskName" placeholder="Task name" />
+      <input type="text" id="assignedTo" placeholder="Assign to (name)" />
+      <select id="taskStatus">
+        <option value="pending">Pending</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+      </select>
+      <button id="addTask">Add Task</button>
     </div>
-  </div>
 
-  <!-- Login modal -->
-  <div id="loginBackdrop" class="modal-backdrop">
-    <div class="modal card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <strong>Sign up / Login</strong>
-        <button id="closeLogin">✕</button>
-      </div>
-
-      <form id="authForm">
-        <div class="row">
-          <label>Full name</label>
-          <input id="authName" required />
-        </div>
-        <div class="row">
-          <label>Email</label>
-          <input id="authEmail" type="email" required />
-        </div>
-        <div class="row">
-          <label>Password</label>
-          <input id="authPassword" type="password" required />
-        </div>
-
-        <div style="display:flex;gap:8px;align-items:center">
-          <button type="submit" class="primary">Sign up / Login</button>
-          <button type="button" id="demoQuick">Quick demo (auto)</button>
-        </div>
-      </form>
+    <div class="filter">
+      <select id="filterStatus">
+        <option value="all">All Tasks</option>
+        <option value="pending">Pending</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+      </select>
+      <button id="clearTasks">Clear All</button>
     </div>
-  </div>
 
-  <!-- Review modal -->
-  <div id="reviewBackdrop" class="modal-backdrop">
-    <div class="modal card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <strong>Leave a review</strong>
-        <button id="closeReview">✕</button>
-      </div>
-
-      <form id="reviewForm">
-        <div class="row">
-          <label>Rating</label>
-          <div id="starRow" style="display:flex;gap:6px">
-            <span class="star" data-value="1">☆</span>
-            <span class="star" data-value="2">☆</span>
-            <span class="star" data-value="3">☆</span>
-            <span class="star" data-value="4">☆</span>
-            <span class="star" data-value="5">☆</span>
-          </div>
-        </div>
-
-        <div class="row">
-          <label>Short review</label>
-          <textarea id="reviewText" placeholder="What did you like?"></textarea>
-        </div>
-
-        <div style="display:flex;gap:8px;align-items:center">
-          <button type="submit" class="primary">Submit review</button>
-          <button type="button" id="cancelReview">Cancel</button>
-        </div>
-      </form>
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Assigned To</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="taskList">
+      </tbody>
+    </table>
   </div>
 
   <script>
-    /*************************************************
-     * Simple localStorage-driven demo frontend logic
-     * - Data lives in localStorage under 'ss_users' and 'ss_lessons'
-     * - This is NOT production authentication. It's a demo.
-     *************************************************/
+    const taskName = document.getElementById('taskName');
+    const assignedTo = document.getElementById('assignedTo');
+    const taskStatus = document.getElementById('taskStatus');
+    const addTaskBtn = document.getElementById('addTask');
+    const taskList = document.getElementById('taskList');
+    const filterStatus = document.getElementById('filterStatus');
+    const clearTasksBtn = document.getElementById('clearTasks');
 
-    // --- Utilities
-    const $ = (s) => document.querySelector(s);
-    const qs = (s, el=document) => el.querySelector(s);
-    const qsa = (s, el=document) => Array.from(el.querySelectorAll(s));
+    // Load tasks from localStorage
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-    // --- Elements
-    const btnLogin = $('#btnLogin');
-    const btnLogout = $('#btnLogout');
-    const who = $('#who');
-    const btnNewLesson = $('#btnNewLesson');
-    const modalBackdrop = $('#modalBackdrop');
-    const loginBackdrop = $('#loginBackdrop');
-    const reviewBackdrop = $('#reviewBackdrop');
-    const lessonForm = $('#lessonForm');
-    const authForm = $('#authForm');
-    const reviewForm = $('#reviewForm');
-    const lessonsEl = $('#lessons');
-    const qInput = $('#q');
-    const sortSelect = $('#sort');
-    const counts = $('#counts');
-    const bookingsList = $('#bookingsList');
-
-    // --- Local data helpers
-    function loadData(key, fallback) {
-      try {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : fallback;
-      } catch(e){ return fallback; }
-    }
-    function saveData(key, val) {
-      localStorage.setItem(key, JSON.stringify(val));
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
     }
 
-    // Initialize storage if not present
-    if (!localStorage.getItem('ss_users')) saveData('ss_users', []);
-    if (!localStorage.getItem('ss_lessons')) saveData('ss_lessons', []);
+    function renderTasks() {
+      const filter = filterStatus.value;
+      taskList.innerHTML = '';
 
-    // Session (demo)
-    let session = loadData('ss_session', null);
-    function setSession(user){
-      session = user ? { id: user.id, name: user.name, email: user.email } : null;
-      saveData('ss_session', session);
-      renderAuth();
-    }
+      tasks.filter(task => filter === 'all' || task.status === filter)
+        .forEach((task, index) => {
+        const tr = document.createElement('tr');
 
-    // --- Demo quick users
-    $('#demoAlice').addEventListener('click', ()=>{
-      ensureDemoUser('Alice','alice@example.com');
-    });
-    $('#demoBob').addEventListener('click', ()=>{
-      ensureDemoUser('Bob','bob@example.com');
-    });
+        const nameTd = document.createElement('td');
+        nameTd.textContent = task.name;
+        if(task.status === 'completed') nameTd.classList.add('completed');
 
-    function ensureDemoUser(name,email){
-      const users = loadData('ss_users', []);
-      let u = users.find(x=>x.email===email);
-      if(!u){
-        u = { id: 'u_'+Date.now(), name, email, password: 'demo' };
-        users.push(u);
-        saveData('ss_users', users);
-      }
-      setSession(u);
-      showToast('Signed in as ' + name);
-    }
+        const assignedTd = document.createElement('td');
+        assignedTd.textContent = task.assignedTo;
 
-    // Auth UI
-    btnLogin.addEventListener('click', ()=> { loginBackdrop.style.display='flex'; $('#authName').focus();});
-    $('#closeLogin').addEventListener('click', ()=> loginBackdrop.style.display='none');
-    $('#demoQuick').addEventListener('click', ()=> {
-      // create sample user and sign in quickly
-      ensureDemoUser('Quick Demo','demo@local');
-      loginBackdrop.style.display='none';
-    });
+        const statusTd = document.createElement('td');
+        statusTd.textContent = task.status;
 
-    authForm.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const name = $('#authName').value.trim();
-      const email = $('#authEmail').value.trim().toLowerCase();
-      const password = $('#authPassword').value;
-      if(!name||!email||!password){ showToast('Fill all fields'); return; }
-      const users = loadData('ss_users', []);
-      let user = users.find(u=>u.email===email);
-      if(!user){
-        // sign up
-        user = { id:'u_'+Date.now(), name, email, password };
-        users.push(user);
-        saveData('ss_users', users);
-        showToast('Account created — signed in');
-      } else {
-        // login: check password (demo only)
-        if(user.password !== password){
-          showToast('Wrong password for demo account');
-          return;
-        }
-        showToast('Signed in');
-      }
-      setSession(user);
-      authForm.reset();
-      loginBackdrop.style.display='none';
-      render();
-    });
+        const actionsTd = document.createElement('td');
 
-    btnLogout.addEventListener('click', ()=>{
-      setSession(null);
-      showToast('Signed out');
-    });
+        const completeBtn = document.createElement('button');
+        completeBtn.textContent = 'Complete';
+        completeBtn.classList.add('action-btn');
+        completeBtn.addEventListener('click', ()=> {
+          tasks[index].status = 'completed';
+          saveTasks();
+          renderTasks();
+        });
 
-    // New lesson modal
-    $('#closeModal').addEventListener('click', ()=> modalBackdrop.style.display='none');
-    $('#cancelModal').addEventListener('click', ()=> modalBackdrop.style.display='none');
-    btnNewLesson.addEventListener('click', ()=> { $('#modalTitle').textContent='New lesson'; modalBackdrop.style.display='flex'; $('#lessonTitle').focus(); });
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.classList.add('action-btn','delete');
+        deleteBtn.addEventListener('click', ()=> {
+          tasks.splice(index,1);
+          saveTasks();
+          renderTasks();
+        });
 
-    lessonForm.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      if(!session){ showToast('Please sign in first'); return; }
-      const title = $('#lessonTitle').value.trim();
-      const desc = $('#lessonDesc').value.trim();
-      const tags = $('#lessonTags').value.split(',').map(t=>t.trim()).filter(Boolean);
-      const time = parseInt($('#lessonTime').value) || 20;
-      if(!title||!desc){ showToast('Title & description required'); return; }
+        actionsTd.appendChild(completeBtn);
+        actionsTd.appendChild(deleteBtn);
 
-      const lessons = loadData('ss_lessons', []);
-      const newL = {
-        id: 'l_' + Date.now(),
-        title, desc, tags, time,
-        createdAt: Date.now(),
-        author: { id: session.id, name: session.name, email: session.email },
-        bookings: [],
-        reviews: [],
-        views: 0,
-      };
-      lessons.unshift(newL);
-      saveData('ss_lessons', lessons);
-      showToast('Lesson posted');
-      lessonForm.reset();
-      modalBackdrop.style.display='none';
-      render();
-    });
+        tr.appendChild(nameTd);
+        tr.appendChild(assignedTd);
+        tr.appendChild(statusTd);
+        tr.appendChild(actionsTd);
 
-    // Booking & review interactions (delegated)
-    lessonsEl.addEventListener('click', (e)=>{
-      const btn = e.target.closest('button');
-      if(!btn) return;
-      const id = btn.dataset.id;
-      if(btn.classList.contains('bookBtn')){
-        handleBook(id);
-      } else if(btn.classList.contains('viewBtn')){
-        handleView(id);
-      } else if(btn.classList.contains('reviewBtn')){
-        openReviewModal(id);
-      }
-    });
-
-    function handleBook(lessonId){
-      if(!session){ showToast('Please sign in to book'); return; }
-      const lessons = loadData('ss_lessons', []);
-      const l = lessons.find(x=>x.id===lessonId);
-      if(!l) return;
-      // create booking
-      const booking = { id:'b_'+Date.now(), userId: session.id, userName: session.name, when: Date.now() };
-      l.bookings.push(booking);
-      saveData('ss_lessons', lessons);
-      showToast('Request sent to ' + l.author.name);
-      render();
-    }
-
-    function handleView(lessonId){
-      const lessons = loadData('ss_lessons', []);
-      const l = lessons.find(x=>x.id===lessonId);
-      if(!l) return;
-      l.views = (l.views || 0) + 1;
-      saveData('ss_lessons', lessons);
-      // open a simple detail alert for demo
-      alert(`${l.title}\n\n${l.desc}\n\nTags: ${l.tags.join(', ')}\nBy: ${l.author.name}\nEstimated: ${l.time} minutes\n\nBookings: ${l.bookings.length}\nAvg rating: ${avgRating(l).toFixed(2)}`);
-      render();
-    }
-
-    // Review modal logic
-    let reviewTarget = null;
-    $('#closeReview').addEventListener('click', ()=> reviewBackdrop.style.display='none');
-    $('#cancelReview').addEventListener('click', ()=> reviewBackdrop.style.display='none');
-
-    function openReviewModal(lessonId){
-      if(!session){ showToast('Sign in to review'); return; }
-      reviewTarget = lessonId;
-      reviewBackdrop.style.display='flex';
-      highlightStars(0);
-    }
-
-    // star rating UI
-    qsa('.star').forEach(s=>{
-      s.addEventListener('mouseover', ()=> highlightStars(parseInt(s.dataset.value)));
-      s.addEventListener('click', ()=> highlightStars(parseInt(s.dataset.value)));
-    });
-    function highlightStars(n){
-      qsa('.star').forEach(s=>{
-        s.textContent = parseInt(s.dataset.value) <= n ? '★' : '☆';
+        taskList.appendChild(tr);
       });
-      reviewForm.dataset.rating = n;
     }
 
-    reviewForm.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const rating = parseInt(reviewForm.dataset.rating) || 0;
-      const text = $('#reviewText').value.trim();
-      if(!reviewTarget) return;
-      const lessons = loadData('ss_lessons', []);
-      const l = lessons.find(x=>x.id===reviewTarget);
-      if(!l) return;
-      l.reviews.push({ id:'r_'+Date.now(), by: { id: session.id, name: session.name }, rating, text, at: Date.now() });
-      saveData('ss_lessons', lessons);
-      reviewBackdrop.style.display='none';
-      $('#reviewText').value='';
-      showToast('Thanks for the review');
-      render();
+    addTaskBtn.addEventListener('click', ()=>{
+      const name = taskName.value.trim();
+      const assigned = assignedTo.value.trim();
+      const status = taskStatus.value;
+      if(!name || !assigned) return alert('Please enter task name and assigned to.');
+      tasks.push({ name, assignedTo: assigned, status });
+      saveTasks();
+      renderTasks();
+      taskName.value = '';
+      assignedTo.value = '';
+      taskStatus.value = 'pending';
     });
 
-    function avgRating(l){
-      if(!l.reviews || l.reviews.length===0) return 0;
-      return l.reviews.reduce((s,r)=>s+r.rating,0) / l.reviews.length;
-    }
-
-    // --- Render functions
-    function renderAuth(){
-      if(session){
-        who.textContent = 'Signed in as ' + session.name;
-        btnLogin.classList.add('hidden');
-        btnLogout.classList.remove('hidden');
-        btnNewLesson.classList.remove('hidden');
-      } else {
-        who.textContent = 'Not signed in';
-        btnLogin.classList.remove('hidden');
-        btnLogout.classList.add('hidden');
-        btnNewLesson.classList.add('hidden');
-      }
-    }
-
-    function render(){
-      renderAuth();
-      const lessons = loadData('ss_lessons', []).slice(); // copy
-      // filtering
-      const q = qInput.value.trim().toLowerCase();
-      let filtered = lessons.filter(l=>{
-        if(!q) return true;
-        if(l.title.toLowerCase().includes(q)) return true;
-        if(l.desc.toLowerCase().includes(q)) return true;
-        if(l.tags.join(' ').toLowerCase().includes(q)) return true;
-        return false;
-      });
-
-      // sort
-      if(sortSelect.value === 'popular'){
-        filtered.sort((a,b)=> (b.bookings?.length||0) - (a.bookings?.length||0));
-      } else {
-        filtered.sort((a,b)=> b.createdAt - a.createdAt);
-      }
-
-      // counts
-      counts.textContent = `${filtered.length} lessons`;
-
-      // bookings list for session user
-      const bs = [];
-      if(session){
-        for(const l of lessons){
-          for(const b of (l.bookings||[])){
-            if(b.userId === session.id) bs.push({ lessonTitle: l.title, when: b.when });
-          }
-        }
-      }
-      bookingsList.innerHTML = bs.length ? bs.map(b=>`<div class="small">${new Date(b.when).toLocaleString()}: <strong>${b.lessonTitle}</strong></div>`).join('') : 'No bookings yet';
-
-      // render lesson cards
-      lessonsEl.innerHTML = filtered.map(l => {
-        const rt = avgRating(l);
-        return `
-          <div class="lesson-card">
-            <div class="row-between">
-              <div style="flex:1">
-                <div class="lesson-title">${escapeHtml(l.title)}</div>
-                <div class="small">${escapeHtml(l.desc.slice(0,120))}${l.desc.length>120?'...':''}</div>
-              </div>
-              <div style="text-align:right">
-                <div class="badge">${l.time}m</div>
-                <div style="font-size:12px;color:var(--muted)">${new Date(l.createdAt).toLocaleDateString()}</div>
-              </div>
-            </div>
-
-            <div class="tags">${(l.tags||[]).map(t=>`<div class="tag">${escapeHtml(t)}</div>`).join('')}</div>
-
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
-              <div>
-                <div class="small">By <strong>${escapeHtml(l.author.name)}</strong> • ${l.bookings?.length||0} bookings</div>
-                <div class="small">Rating: ${rt.toFixed(2)} (${l.reviews?.length||0}) • Views: ${l.views||0}</div>
-              </div>
-              <div style="display:flex;gap:8px;align-items:center">
-                <button class="viewBtn" data-id="${l.id}">View</button>
-                <button class="bookBtn" data-id="${l.id}">Book</button>
-                <button class="reviewBtn" data-id="${l.id}">Review</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // simple XSS escape
-    function escapeHtml(s){
-      return (''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    // search & sort listeners
-    qInput.addEventListener('input', debounce(render, 220));
-    sortSelect.addEventListener('change', render);
-
-    // Show small toast-like message
-    function showToast(msg){
-      // simple alert-like non-blocking (could be improved)
-      const tmp = document.createElement('div');
-      tmp.textContent = msg;
-      tmp.style.position='fixed';
-      tmp.style.right='20px';
-      tmp.style.bottom='20px';
-      tmp.style.padding='10px 14px';
-      tmp.style.borderRadius='10px';
-      tmp.style.background='linear-gradient(90deg,#0ea5a9,#60a5fa)';
-      tmp.style.color='#012';
-      tmp.style.zIndex=1000;
-      tmp.style.boxShadow='0 8px 30px rgba(1,9,25,0.6)';
-      document.body.appendChild(tmp);
-      setTimeout(()=> tmp.style.transform='translateY(-10px)', 10);
-      setTimeout(()=> tmp.remove(), 2600);
-    }
-
-    // small debounce
-    function debounce(fn, ms=200){
-      let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); };
-    }
-
-    // initial demo seed if empty
-    function seedDemoData(){
-      const lessons = loadData('ss_lessons', []);
-      if(lessons.length === 0){
-        const now = Date.now();
-        const sample = [
-          {
-            id:'l1', title:'Intro to JavaScript: 20min crash',
-            desc:'Quick hands-on introduction to JavaScript basics — variables, functions, DOM manipulation with examples.',
-            tags:['JavaScript','Frontend'], time:20, createdAt: now - 1000*60*60*24*3,
-            author:{id:'u_demo', name:'Teacher A', email:'a@demo'},
-            bookings:[], reviews:[ {id:'r1', by:{id:'u_demo2', name:'Sam'}, rating:5, text:'Great intro', at:now-100000} ], views: 5
-          },
-          {
-            id:'l2', title:'SQL SELECT tricks — 25min',
-            desc:'Learn common SELECT patterns, GROUP BY, joins and practical tips to debug queries.',
-            tags:['SQL','Data'], time:25, createdAt: now - 1000*60*60*24*2,
-            author:{id:'u_demo2', name:'Data Guru', email:'g@demo'},
-            bookings:[], reviews:[], views:2
-          }
-        ];
-        saveData('ss_lessons', sample);
-      }
-    }
-
-    // bootstrap
-    seedDemoData();
-    render();
-
-    // make login modal closable by backdrop click
-    document.querySelectorAll('.modal-backdrop').forEach(back => {
-      back.addEventListener('click', (e)=>{
-        if(e.target === back) back.style.display = 'none';
-      });
-    });
-
-    // helpful: clear local storage button for developers (hold SHIFT+click on logo to clear)
-    document.querySelector('.logo').addEventListener('click', (e)=>{
-      if(e.shiftKey){
-        if(confirm('Clear all demo data (users & lessons)?')) {
-          localStorage.removeItem('ss_users'); localStorage.removeItem('ss_lessons'); localStorage.removeItem('ss_session');
-          seedDemoData(); setSession(null); render();
-          showToast('Demo data reset');
-        }
+    filterStatus.addEventListener('change', renderTasks);
+    clearTasksBtn.addEventListener('click', ()=>{
+      if(confirm('Clear all tasks?')){
+        tasks = [];
+        saveTasks();
+        renderTasks();
       }
     });
 
+    renderTasks();
   </script>
 </body>
 </html>
